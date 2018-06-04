@@ -12,7 +12,8 @@ import yt
 import numpy as np
 
 # Parameters to modify
-resolution = 4096
+resolution = 8192
+resolution = 1024
 box_width = 10 #Mpc
 halo_radius = 70 #kpc
 igm_vel = -80 #km/s negative means inflowing
@@ -108,19 +109,19 @@ ds.add_field(("gas", "velocity_los"), function=_v_los, units="km/s", sampling_ty
 
 
 # Plot a top-down view of the field in density and overlay the velocity vectors
-s = yt.SlicePlot(ds, "x", ('gas', 'density'), center=c, data_source=ad, width=(10, 'Mpc'))
-s.set_cmap("density", "Blues")
-s.annotate_marker(c)
-s.annotate_quiver('velocity_y', 'velocity_z', factor=12, plot_args={"color":"red"})
-s.save('doppler.png')
-s.annotate_clear()
-s.annotate_marker(c)
-s.annotate_quiver('zeros', 'velocity_cosmo', factor=12, plot_args={"color":"green"})
-s.save('cosmo.png')
-s.annotate_clear()
-s.annotate_marker(c)
-s.annotate_quiver('velocity_y', 'velocity_los', factor=12, plot_args={"color":"black"})
-s.save('cosmo_doppler.png')
+#s = yt.SlicePlot(ds, "x", ('gas', 'density'), center=c, data_source=ad, width=(10, 'Mpc'))
+#s.set_cmap("density", "Blues")
+#s.annotate_marker(c)
+#s.annotate_quiver('velocity_y', 'velocity_z', factor=12)#, plot_args={"color":"red"})
+#s.save('doppler.png')
+#s.annotate_clear()
+#s.annotate_marker(c)
+#s.annotate_quiver('zeros', 'velocity_cosmo', factor=12)#, plot_args={"color":"green"})
+#s.save('cosmo.png')
+#s.annotate_clear()
+#s.annotate_marker(c)
+#s.annotate_quiver('velocity_y', 'velocity_los', factor=12)#, plot_args={"color":"black"})
+#s.save('cosmo_doppler.png')
 
 # make a phase plot comparing impact parameter to effective LOS velocity
 phase = yt.PhasePlot(ad, ('index', "impact_parameter"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
@@ -128,5 +129,8 @@ phase.set_log('velocity_los', False)
 phase.set_xlim(20, 5000)
 phase.set_ylim(-1500, 1500)
 phase.set_cmap('column_density', 'dusk')
-#phase.set_zlim('column_density', 1e-46, 1e-42)
 phase.save('phase.png')
+import pickle
+tup = (phase.profile['column_density'], phase.profile.x, phase.profile.y)
+# Output the phase plot image arrays to a pickle file.
+pickle.dump( tup, open( "image.p", "wb" ) )
