@@ -1,0 +1,39 @@
+Project with Yuguang
+
+He has MOSFIRE data from a ton of different absorber systems plotted in 
+radial velocity vs impact parameter.  These are nominally for M_star ~ 1e10
+(i.e. L* systems) at z~2.  They plot Lyman alpha column density as a contour 
+plot and show a bunch of interesting features, particularly at the 1 Mpc 
+impact parameter distance, but they are having a hard time understanding 
+the signal.  
+
+I proposed making a code that would create a similar plot from two-dimensional
+distributions of matter.  By using simple models, like a ring of inflowing Ly-a
+at X distance, we could see what the equivalent plot that he generated looks 
+like.  That would inform us as to what is going on in the bulk signal and if
+the characteristics are most consistent with all inflowing material, all 
+outflowing material, or what.
+
+I created a series of ICs with varying conditions.  All of them are a 10x10x10
+Mpc box centered on the origin (where the galaxy sits).  I vary the density of
+the gas throughout this box, the velocity of the gas with respect to the center
+and create phase plots to represent the plot that Yuguang produces from his
+data: impact parameter vs v_los.
+
+static_uni_uni_0000
+box of uniform density gas with no velocity
+
+collapsing gas with uniform density and uniform velocity (-100, -300, -1000km/s)
+col_uni_uni_0100 
+
+collapsing gas with gradient in density and uniform velocity
+
+collapsing gas with gradient in density and gradient in velocity
+
+
+phaseW_X_Y_Z.png
+
+W = inflow velocity of IGM in km/s
+X = outflow velocity of CGM in km/s
+Y = size of halo in kpc
+Z = weighting of halo's NFW density over the background IGM at r_vir
