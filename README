@@ -37,3 +37,21 @@ W = inflow velocity of IGM in km/s
 X = outflow velocity of CGM in km/s
 Y = size of halo in kpc
 Z = weighting of halo's NFW density over the background IGM at r_vir
+
+
+Radial Velocity Code is to be run on a number of FIRE outputs around z=2.1 
+to make radial profiles of the radial velocity going out to 4 r_vir.  It can 
+be run on a number of outputs by creating a filelist.txt where each line of the
+filelist is the full path of a FIRE snapshot.
+
+python radial_velocity1.py filelist.txt
+python radial_velocity2.py filelist.txt
+
+It will generate a median_file.h5 which contains two arrays: 
+--radius array in units of r_vir
+--radial_velocity array in units of km/s
+
+The radial velocity array contains three columns:
+--median value of radial velocity
+--25% value of radial velocity
+--75% value of radial velocity
