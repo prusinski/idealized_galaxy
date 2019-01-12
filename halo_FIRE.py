@@ -6,9 +6,15 @@ import matplotlib as mpl
 mpl.use('Agg')
 from matplotlib import pyplot as plt
 import yt
+yt.enable_parallelism()
+import numpy as np
 from yt.frontends.gizmo.api import GizmoDataset
 import sys
+from scipy.signal import gaussian
+from scipy.ndimage import filters
+import os
 
+# using smoothing length as an analog for the size of the gas region
 def _column_density(field, data):
     return data[('gas', 'H_number_density')] * data[('gas', 'smoothing_length')]
 
@@ -63,29 +69,19 @@ def read_amiga_center(amiga_data, output_fn, ds):
     center = amiga_data[halo,1:4][0]
     return ds.arr(center, 'code_length')
 
-def read_amiga_rvir(amiga_data, output_fn, ds):
-    """
-    Figure out the virial radius from amiga's smoothed halo outputs
-    (e.g., halo_0000_smooth.dat) for a given output_fn
-    """
-    output_number = int(os.path.basename(output_fn).split('.')[0][-3:])
-    halo = amiga_data[:,0] == output_number
-    rvir = amiga_data[halo,4][0]
-    return ds.quan(rvir, 'code_length')
-
 if __name__ == '__main__':
 
-    fn = sys.argv[1]
+    with open(sys.argv[1]) as f:
+        fns = [fn.rstrip() for fn in f.readlines()]
     
-    #amiga_data = get_amiga_data(sys.argv[2])
-    #amiga_data = smooth_amiga(amiga_data)
+    amiga_data = get_amiga_data(sys.argv[2])
+    amiga_data = smooth_amiga(amiga_data)
     for fn in yt.parallel_objects(fns):
         fn = fn.strip()
         fn_head = fn.split('/')[-1]
         ds = GizmoDataset(fn)
-        #c = read_amiga_center(amiga_data, fn, ds)
-        #rvir = read_rockstar_rvir(rockstar_data, ds)
-        _, c = ds.find_max('density')
+        c = read_amiga_center(amiga_data, fn, ds)
+        #_, c = ds.find_max('density')
         rvir = ds.quan(30, 'kpc')
         sp = ds.sphere(c, rvir)
         bulk_vel = sp.quantities.bulk_velocity()
