@@ -38,6 +38,12 @@ X = outflow velocity of CGM in km/s
 Y = size of halo in kpc
 Z = weighting of halo's NFW density over the background IGM at r_vir
 
+Code is run as halo.py.  Because of some difficulties Yuguang was having
+with rendering the image, I added the bit at the end to store the data as
+a pickle file, then run load.py afterwards to save it.  Seems to have fixed
+this weird bug.
+
+---
 
 Radial Velocity Code is to be run on a number of FIRE outputs around z=2.1 
 to make radial profiles of the radial velocity going out to 4 r_vir.  It can 
@@ -55,3 +61,11 @@ The radial velocity array contains three columns:
 --median value of radial velocity
 --25% value of radial velocity
 --75% value of radial velocity
+
+--
+
+Added code to do similar calculations as halo.py but with actual simulation 
+datasets including both particle-based (FIRE) and grid-based (Tempest):
+
+python halo_FIRE.py <dataset>
+python halo_TEMPEST.py <dataset>
