@@ -7,6 +7,8 @@ from yt.frontends.gizmo.api import GizmoDataset
 from yt.units import dimensions
 import sys
 import h5py as h5
+from scipy.signal import gaussian
+from scipy.ndimage import filters
 
 def get_amiga_data(fn):
     """

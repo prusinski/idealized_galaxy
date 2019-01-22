@@ -75,8 +75,8 @@ if __name__ == '__main__':
     with open(sys.argv[1]) as f:
         fns = [fn.rstrip() for fn in f.readlines()]
     
-    #amiga_data = get_amiga_data(sys.argv[2])
-    #amiga_data = smooth_amiga(amiga_data)
+    amiga_data = get_amiga_data(sys.argv[2])
+    amiga_data = smooth_amiga(amiga_data)
     for fn in yt.parallel_objects(fns):
         fn = fn.strip()
         fn_head = fn.split('/')[-1]
