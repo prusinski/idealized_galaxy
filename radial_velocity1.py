@@ -10,6 +10,7 @@ import h5py as h5
 from scipy.signal import gaussian
 from scipy.ndimage import filters
 from radial_profile1 import find_center_iteratively
+import trident
 
 def get_amiga_data(fn):
     """
@@ -76,6 +77,7 @@ if __name__ == '__main__':
         fn_head = fn.split('/')[-1]
         rprof_fn = "%s_rprof.h5" % fn_head
         ds = GizmoDataset(fn)
+        trident.add_ion_fields('H') # add H I mass field
         c = find_center_iteratively(fn, ds=ds)
         #c = read_amiga_center(amiga_data, fn, ds)
         #rvir = read_rockstar_rvir(rockstar_data, ds)
@@ -88,7 +90,8 @@ if __name__ == '__main__':
         sp.set_field_parameter("bulk_velocity", bulk_vel)
     
         rp1 = yt.create_profile(sp, ('gas', 'radius'), ('gas', 'radial_velocity'),
-                                weight_field=('gas', 'mass'),
+                                weight_field=('gas', 'H_p0_mass'),
+                                #weight_field=('gas', 'mass'),
                                 #units = {('gas', 'radius'): 'r_vir'},
                                 units = {('gas', 'radius'): 'kpc'},
                                 logs = {('gas', 'radius'): False}, n_bins=128)
