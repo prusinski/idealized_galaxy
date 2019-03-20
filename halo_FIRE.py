@@ -14,6 +14,7 @@ from scipy.signal import gaussian
 from scipy.ndimage import filters
 import os
 import cmocean
+from radial_profile1 import find_center_iteratively
 
 # using smoothing length as an analog for the size of the gas region
 def _column_density(field, data):
@@ -70,23 +71,25 @@ def read_amiga_center(amiga_data, output_fn, ds):
     center = amiga_data[halo,1:4][0]
     return ds.arr(center, 'code_length')
 
+
 if __name__ == '__main__':
 
     with open(sys.argv[1]) as f:
         fns = [fn.rstrip() for fn in f.readlines()]
     
-    amiga_data = get_amiga_data(sys.argv[2])
-    amiga_data = smooth_amiga(amiga_data)
+    #amiga_data = get_amiga_data(sys.argv[2])
+    #amiga_data = smooth_amiga(amiga_data)
     for fn in yt.parallel_objects(fns):
         fn = fn.strip()
         fn_head = fn.split('/')[-1]
         ds = GizmoDataset(fn)
+        c = find_center_iteratively(fn, ds=ds)
         #c = read_amiga_center(amiga_data, fn, ds)
-        _, c = ds.find_max('density')
+        #_, c = ds.find_max('density')
         rvir = ds.quan(30, 'kpc')
         sp = ds.sphere(c, rvir)
         bulk_vel = sp.quantities.bulk_velocity()
-        print("Bulk Velocity of Halo = %s" % bulk_vel.to('km/s'))
+        #print("Bulk Velocity of Halo = %s" % bulk_vel.to('km/s'))
         sp.set_field_parameter("bulk_velocity", bulk_vel)
         ad = ds.all_data()
         ad.set_field_parameter('center', c)
@@ -99,7 +102,7 @@ if __name__ == '__main__':
         p.set_xlim(1e1, 1e4)
         p.set_ylim(-1000,1000)
         p.set_cmap(('gas', 'H_I_column_density'), 'thermal')
-        p.set_zlim(('gas', 'H_I_column_density'), 1e12, 1e21)
+        p.set_zlim(('gas', 'H_I_column_density'), 1e12, 1e25)
         p.set_xlabel('Impact Parameter (kpc)')
         p.set_ylabel('Line of Sight Velocity (km/s)')
         p.save()
