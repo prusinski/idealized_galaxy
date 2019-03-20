@@ -9,6 +9,7 @@ import sys
 import h5py as h5
 from scipy.signal import gaussian
 from scipy.ndimage import filters
+from radial_profile1 import find_center_iteratively
 
 def get_amiga_data(fn):
     """
@@ -75,9 +76,10 @@ if __name__ == '__main__':
         fn_head = fn.split('/')[-1]
         rprof_fn = "%s_rprof.h5" % fn_head
         ds = GizmoDataset(fn)
+        c = find_center_iteratively(fn, ds=ds)
         #c = read_amiga_center(amiga_data, fn, ds)
         #rvir = read_rockstar_rvir(rockstar_data, ds)
-        _, c = ds.find_max('density')
+        #_, c = ds.find_max('density')
         rvir = ds.quan(100, 'kpc')
         ds.unit_registry.add('r_vir', rvir.to("cm").tolist(), dimensions.length, tex_repr=r"r_{vir}")
         radial_extent = 4
@@ -87,7 +89,8 @@ if __name__ == '__main__':
     
         rp1 = yt.create_profile(sp, ('gas', 'radius'), ('gas', 'radial_velocity'),
                                 weight_field=('gas', 'mass'),
-                                units = {('gas', 'radius'): 'r_vir'},
+                                #units = {('gas', 'radius'): 'r_vir'},
+                                units = {('gas', 'radius'): 'kpc'},
                                 logs = {('gas', 'radius'): False}, n_bins=128)
     
         rprof_file = h5.File(rprof_fn, 'w')
