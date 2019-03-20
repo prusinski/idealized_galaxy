@@ -77,7 +77,7 @@ if __name__ == '__main__':
         fn_head = fn.split('/')[-1]
         rprof_fn = "%s_rprof.h5" % fn_head
         ds = GizmoDataset(fn)
-        trident.add_ion_fields('H') # add H I mass field
+        trident.add_ion_fields(ds, 'H') # add H I mass field
         c = find_center_iteratively(fn, ds=ds)
         #c = read_amiga_center(amiga_data, fn, ds)
         #rvir = read_rockstar_rvir(rockstar_data, ds)
