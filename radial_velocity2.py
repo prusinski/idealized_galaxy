@@ -48,8 +48,10 @@ if __name__ == '__main__':
     ax.plot(r_arr[0], rv_meds[:,0], color='blue', linewidth=3)
     plt.fill_between(r_arr[0], rv_meds[:,1], rv_meds[:,2], facecolor='blue', alpha=0.2)
 
-    ax.set_xlabel(r"$\mathrm{r\ (rvir)}$")
+    #ax.set_xlabel(r"$\mathrm{r\ (rvir)}$")
+    #ax.set_xlim(0,4)
+    ax.set_xlabel(r"$\mathrm{r\ (kpc)}$")
     ax.set_ylabel(r"$\mathrm{v_{radial}\ (km/s)}$")
-    ax.set_xlim(0,4)
+    ax.set_xlim(0,400)
 
     fig.savefig("velocity.png")
