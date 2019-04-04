@@ -144,10 +144,10 @@ def find_center_iteratively(fn, frac=0.9, n_parts=50, ds=None):
         coords = coords[mask]
         mass = mass[mask]
     f.close()
-    print(c)
+    #print(c)
     if ds is not None:
         c = ds.arr(c, 'code_length')
-    print(c)
+    #print(c)
     return c
 
 def make_phase(ds, data_source):
