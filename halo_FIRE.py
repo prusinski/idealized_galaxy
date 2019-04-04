@@ -15,6 +15,7 @@ from scipy.ndimage import filters
 import os
 import cmocean
 from radial_profile1 import find_center_iteratively
+from astropy.io import fits
 
 # using smoothing length as an analog for the size of the gas region
 def _column_density(field, data):
@@ -71,6 +72,17 @@ def read_amiga_center(amiga_data, output_fn, ds):
     center = amiga_data[halo,1:4][0]
     return ds.arr(center, 'code_length')
 
+def save_as_fits(phaseplot, filename, field=('gas', 'H_I_column_density')):
+    hdu1 = fits.PrimaryHDU(phaseplot._profile[field].v.T)
+    hdu1.writeto(filename, overwrite=1)
+
+def save_as_text(phaseplot, filename):
+    f = open(filename, 'w')
+    f.write('impact parameter bin edges [kpc]\n')
+    for j in phaseplot._profile.x_bins.v: f.write('%f\n' % j)
+    f.write('radial velocity bin edges [km/s]\n')
+    for j in phaseplot._profile.y_bins.v: f.write('%f\n' % j)
+    f.close()
 
 if __name__ == '__main__':
 
@@ -86,6 +98,7 @@ if __name__ == '__main__':
         fn_head = fn.split('/')[-1]
         num = int(fn_head.split('.')[0][-3:])
         ds = GizmoDataset(fn)
+        #ds = yt.load(fn)
         c = find_center_iteratively(fn, ds=ds)
         #c = read_amiga_center(amiga_data, fn, ds)
         #_, c = ds.find_max('density')
@@ -98,7 +111,7 @@ if __name__ == '__main__':
             ad = ds.all_data()
             ad.set_field_parameter('center', c)
             ad.set_field_parameter('bulk_velocity', bulk_vel)
-            ad.set_field_parameter('normal', ax)
+            ad.set_field_parameter('normal', np.array(ax))
             p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_column_density'), weight_field=('gas', 'ones'))
             p.set_unit(('PartType0', 'cylindrical_radius_kpc'), 'kpc')
             p.set_unit(('PartType0', 'velocity_cylindrical_z'), 'km/s')
@@ -109,10 +122,7 @@ if __name__ == '__main__':
             p.set_zlim(('gas', 'H_I_column_density'), 1e12, 1e25)
             p.set_xlabel('Impact Parameter (kpc)')
             p.set_ylabel('Line of Sight Velocity (km/s)')
-            p.save('images/KBSS_%03i_%1i.fits' % (num, i))
-            f = open('images/KBSS_%03i_%1i.txt' % (num, i), 'w')
-            f.write('impact parameter bin edges [kpc]\n')
-            for j in p._profile.x_bins.v: f.write(j\n)
-            f.write('radial velocity bin edges [km/s]\n')
-            for j in p._profile.y_bins.v: f.write(j\n)
-            f.close()
+            fn = 'KBSS_%03i_%1i' % (num, i)
+            p.save(fn+'.png')
+            save_as_fits(p, fn+'.fits')
+            save_as_text(p, fn+'.txt')
