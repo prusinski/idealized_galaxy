@@ -18,15 +18,15 @@ from radial_profile1 import find_center_iteratively
 from astropy.io import fits
 
 # using smoothing length as an analog for the size of the gas region
-def _column_density(field, data):
-    return data[('gas', 'H_number_density')] * data[('gas', 'smoothing_length')]
+def _H_I_number(field, data):
+    return data[('gas', 'H_number_density')] * (4./3. * 3.14 * data[('gas', 'smoothing_length')]**3)
 
 # This is to correct a problem in the tip of yt-4 that messes up the units
 # of cylindrical radius to be a factor of kpc/cm too low
 def _cylindrical_radius_kpc(field, data):
     return data[('PartType0', 'cylindrical_radius')] / (3e21)
 
-yt.add_field(("gas","H_I_column_density"), function=_column_density, units="cm**-2", sampling_type='particle')
+yt.add_field(("gas","H_I_number"), function=_H_I_number, units="", sampling_type='particle')
 yt.add_field(("PartType0","cylindrical_radius_kpc"), function=_cylindrical_radius_kpc, units="cm", sampling_type='particle')
 
 def get_amiga_data(fn):
@@ -72,7 +72,7 @@ def read_amiga_center(amiga_data, output_fn, ds):
     center = amiga_data[halo,1:4][0]
     return ds.arr(center, 'code_length')
 
-def save_as_fits(phaseplot, filename, field=('gas', 'H_I_column_density')):
+def save_as_fits(phaseplot, filename, field=('gas', 'H_I_number')):
     hdu1 = fits.PrimaryHDU(phaseplot._profile[field].v.T)
     hdu1.writeto(filename, overwrite=1)
 
@@ -112,15 +112,15 @@ if __name__ == '__main__':
             ad.set_field_parameter('center', c)
             ad.set_field_parameter('bulk_velocity', bulk_vel)
             ad.set_field_parameter('normal', np.array(ax))
-            #p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_column_density'), weight_field=('gas', 'ones'))
-            p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_column_density'), weight_field=None)
+            #p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_number'), weight_field=('gas', 'ones'))
+            p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_number'), weight_field=None)
             p.set_unit(('PartType0', 'cylindrical_radius_kpc'), 'kpc')
             p.set_unit(('PartType0', 'velocity_cylindrical_z'), 'km/s')
             p.set_log(('PartType0', 'velocity_cylindrical_z'), False)
             p.set_xlim(1e1, 1e4)
             p.set_ylim(-1000,1000)
-            p.set_cmap(('gas', 'H_I_column_density'), 'thermal')
-            p.set_zlim(('gas', 'H_I_column_density'), 1e12, 1e25)
+            p.set_cmap(('gas', 'H_I_number'), 'thermal')
+            #p.set_zlim(('gas', 'H_I_number'), 1e12, 1e25)
             p.set_xlabel('Impact Parameter (kpc)')
             p.set_ylabel('Line of Sight Velocity (km/s)')
             fn = 'images/KBSS_%03i_%1i' % (num, i)
