@@ -84,7 +84,7 @@ def save_as_text(phaseplot, filename):
     # f.write('radial velocity bin edges [km/s]\n')
     # for j in phaseplot._profile.y_bins.v: f.write('%f\n' % j)
     # f.close()
-    
+
     bs = phaseplot._profile.x_bins.v
     vs = phaseplot._profile.y_bins.v
     btab = Table([bs], names=('b'))
@@ -126,7 +126,7 @@ if __name__ == '__main__':
             p.set_unit(('PartType0', 'cylindrical_radius'), 'kpc')
             p.set_unit(('PartType0', 'velocity_cylindrical_z'), 'km/s')
             p.set_log(('PartType0', 'velocity_cylindrical_z'), False)
-            p.set_xlim(1e1, 1e4)
+            p.set_xlim(1e1, 250)
             p.set_ylim(-1000,1000)
             p.set_cmap(('gas', 'H_I_column_density'), cmocean.cm.thermal)
             #p.set_zlim(('gas', 'H_I_number'), 1e12, 1e25)
@@ -136,4 +136,5 @@ if __name__ == '__main__':
             fn = 'images/KBSS_%03i_%1i' % (num, i)
             p.save(fn+'.png')
             save_as_fits(p, fn+'.fits')
-            save_as_text(p, fn)
+            if i == 0:
+                save_as_text(p, fn)
