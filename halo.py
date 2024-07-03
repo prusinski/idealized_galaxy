@@ -1,19 +1,19 @@
 """
 Create a 3D (2D) grid of gas cells to represent the volume around a generic galaxy.
 The grid exists in two parts:
-1) A galaxy halo (sphere) at the center of the volume with an NFW density 
+1) A galaxy halo (sphere) at the center of the volume with an NFW density
    profile and velocity vectors traveling radially outward from the center with
    uniform velocity.
 2) A background IGM with uniform density beyond the virial radius of the halo
-   and uniform velocity all traveling radially inward toward the center of the 
+   and uniform velocity all traveling radially inward toward the center of the
    halo.
 """
-import yt 
+import yt
 import numpy as np
 
 # Parameters to modify
+# resolution = 8192
 resolution = 8192
-resolution = 1024
 box_width = 10 #Mpc
 halo_radius = 70 #kpc
 igm_vel = -80 #km/s negative means inflowing
@@ -24,14 +24,14 @@ igm_weight = 1/500 # relative weight to uniform IGM density versus halo density 
 arr = np.ones([1, resolution, resolution])
 zeros = 0*arr
 data = dict(test = (arr, 'g'))
-bbox = np.array([[-box_width/2, box_width/2], [-box_width/2, box_width/2], 
+bbox = np.array([[-box_width/2, box_width/2], [-box_width/2, box_width/2],
                  [-box_width/2, box_width/2]]) # bounding box
 # Create the dataset in yt
-ds = yt.load_uniform_grid(data, arr.shape, length_unit="Mpc", bbox=bbox, nprocs=64)
+ds = yt.load_uniform_grid(data, arr.shape, length_unit="Mpc", bbox=bbox, nprocs=64) #64
 ad = ds.all_data()
 c = [0,0,0] # center
 
-# Virial radius and scale radius.  Acceptable values for scale radius are 
+# Virial radius and scale radius.  Acceptable values for scale radius are
 # between 0.025 and 0.25 for actual galaxies fit with NFWs. We choose 0.25 to
 # maximize mass in halo.
 r_vir = ds.quan(halo_radius, 'kpc')
@@ -44,9 +44,9 @@ r_scale3 = r_scale**3
 def _density(field, data):
     halo = data['radius'] <= r_vir
     # uniform density beyond r_vir
-    vals = igm_weight * data.ds.arr(data['ones'], 'g/cm**3') / (r_scale*r_vir.in_units('cm').v + r_scale3*r_vir.in_units('cm').v**3) 
+    vals = igm_weight * data.ds.arr(data['ones'], 'g/cm**3') / ((r_vir.in_units('cm').v/r_scale) * (1 + r_vir.in_units('cm').v/r_scale)**2)
     # NFW density for halo: r_scale is 25% of r_vir
-    vals[halo] = 1/(r_scale*data['radius'][halo].v + (r_scale3*data['radius'][halo]**3).v)
+    vals[halo] = 1/((data['radius'][halo].v/r_scale) * (1 + data['radius'][halo].v/r_scale)**2)
     return vals
 ds.add_field(("gas", "density"), function=_density, units="g/cm**3", sampling_type='cell')
 
@@ -90,18 +90,18 @@ def _impact_parameter(field, data):
 ds.add_field(("index", "impact_parameter"), function=_impact_parameter, units="kpc", sampling_type='cell')
 
 # Add a cosmological line of sight velocity field
-H_2 = ds.quan(200, 'km/s/Mpc') 
+H_2 = ds.quan(200, 'km/s/Mpc')
 def _v_cosmo(field, data):
     return H_2*data['z']
 ds.add_field(("gas", "velocity_cosmo"), function=_v_cosmo, units="km/s", sampling_type='cell')
 
 # Make an effective LOS velocity field, which is a combination of the true LOS
-# velocity (z velocity) and the hubble velocity (H * D_z) = hubble parameter at 
+# velocity (z velocity) and the hubble velocity (H * D_z) = hubble parameter at
 # redshift 2 ~ 200 km/s * the distance in z direction from galaxy.
 # in this case, it is somewhat simplified because the galaxy sits at the origin
 # and has zero velocity.
 
-# Remember there is a cross term because this is at z=2, so line of sight 
+# Remember there is a cross term because this is at z=2, so line of sight
 # velocity is actually 3*velocity_z + cosmological velocity
 def _v_los(field, data):
     return 3*data['velocity_z'] + H_2*data['z']
@@ -109,28 +109,57 @@ ds.add_field(("gas", "velocity_los"), function=_v_los, units="km/s", sampling_ty
 
 
 # Plot a top-down view of the field in density and overlay the velocity vectors
-#s = yt.SlicePlot(ds, "x", ('gas', 'density'), center=c, data_source=ad, width=(10, 'Mpc'))
-#s.set_cmap("density", "Blues")
-#s.annotate_marker(c)
-#s.annotate_quiver('velocity_y', 'velocity_z', factor=12)#, plot_args={"color":"red"})
-#s.save('doppler.png')
-#s.annotate_clear()
-#s.annotate_marker(c)
-#s.annotate_quiver('zeros', 'velocity_cosmo', factor=12)#, plot_args={"color":"green"})
-#s.save('cosmo.png')
-#s.annotate_clear()
-#s.annotate_marker(c)
-#s.annotate_quiver('velocity_y', 'velocity_los', factor=12)#, plot_args={"color":"black"})
-#s.save('cosmo_doppler.png')
+# s = yt.SlicePlot(ds, "x", ('gas', 'density'), center=c, data_source=ad, width=(500, 'kpc'))
+# s.set_cmap("density", "Blues")
+# s.annotate_marker(c)
+# s.annotate_quiver('velocity_y', 'velocity_z', factor=12)#, plot_args={"color":"red"})
+# s.save('doppler.png')
+# s.clear_annotations()
+# s.annotate_marker(c)
+# s.annotate_quiver('zeros', 'velocity_cosmo', factor=12)#, plot_args={"color":"green"})
+# s.save('cosmo.png')
+# s.clear_annotations()
+# s.annotate_marker(c)
+# s.annotate_quiver('velocity_y', 'velocity_los', factor=12)#, plot_args={"color":"black"})
+# s.save('cosmo_doppler.png')
+#
+# p = yt.SlicePlot(ds, "x", ('gas', 'column_density'), center=c, data_source=ad, width=(500, 'kpc'))
+# p.save('N_vs_z.png')
+# p.show()
+
+# ('index', 'z')
+# p = yt.ProfilePlot(ad, 'z', ('gas', 'column_density'), weight_field=None, plot_spec=dict(marker='.', linestyle='None', alpha=1))
+# p.set_unit('z', 'kpc')
+# p.set_xlim(-250, 250)
+# p.save('rho_vs_r.png')
+# p.show()
+#
+# p = yt.ProfilePlot(ad, ("index", "impact_parameter"), ('gas', 'column_density'), weight_field=None, plot_spec=dict(marker='.', linestyle='None', alpha=1))
+# p.set_unit(("index", "impact_parameter"), 'kpc')
+# p.set_xlim(10, 250)
+# # p.save('rho_vs_r.png')
+# p.show()
+
+phase = yt.PhasePlot(ad, ('index', "z"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
+phase.set_log('velocity_los', False)
+phase.set_log(('index','z'), False)
+phase.set_unit(('index', 'z'), 'kpc')
+phase.set_xlim(-250, 250)
+# phase.set_ylim(-1500, 1500)
+phase.set_cmap('column_density', 'dusk')
+# phase.save('phase.png')
+phase.show()
+
 
 # make a phase plot comparing impact parameter to effective LOS velocity
-phase = yt.PhasePlot(ad, ('index', "impact_parameter"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
-phase.set_log('velocity_los', False)
-phase.set_xlim(20, 5000)
-phase.set_ylim(-1500, 1500)
-phase.set_cmap('column_density', 'dusk')
-phase.save('phase.png')
-import pickle
-tup = (phase.profile['column_density'], phase.profile.x, phase.profile.y)
-# Output the phase plot image arrays to a pickle file.
-pickle.dump( tup, open( "image.p", "wb" ) )
+# phase = yt.PhasePlot(ad, ('index', "impact_parameter"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
+# phase.set_log('velocity_los', False)
+# phase.set_xlim(10, 250)
+# phase.set_ylim(-1500, 1500)
+# phase.set_cmap('column_density', 'dusk')
+# phase.save('phase.png')
+# phase.show()
+# import pickle
+# tup = (phase.profile['column_density'], phase.profile.x, phase.profile.y)
+# # Output the phase plot image arrays to a pickle file.
+# pickle.dump( tup, open( "image.p", "wb" ) )
