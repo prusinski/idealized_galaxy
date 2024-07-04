@@ -13,8 +13,8 @@ import numpy as np
 
 # Parameters to modify
 # resolution = 8192
-resolution = 8192
-box_width = 10 #Mpc
+resolution = 4096
+box_width = 0.5 #10 #Mpc
 halo_radius = 70 #kpc
 igm_vel = -80 #km/s negative means inflowing
 halo_vel = 200 #km/s
@@ -140,25 +140,25 @@ ds.add_field(("gas", "velocity_los"), function=_v_los, units="km/s", sampling_ty
 # # p.save('rho_vs_r.png')
 # p.show()
 
-phase = yt.PhasePlot(ad, ('index', "z"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
-phase.set_log('velocity_los', False)
-phase.set_log(('index','z'), False)
-phase.set_unit(('index', 'z'), 'kpc')
-phase.set_xlim(-250, 250)
-# phase.set_ylim(-1500, 1500)
-phase.set_cmap('column_density', 'dusk')
-# phase.save('phase.png')
-phase.show()
+# phase = yt.PhasePlot(ad, ('index', "z"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
+# phase.set_log('velocity_los', False)
+# phase.set_log(('index','z'), False)
+# phase.set_unit(('index', 'z'), 'kpc')
+# phase.set_xlim(-250, 250)
+# # phase.set_ylim(-1500, 1500)
+# phase.set_cmap('column_density', 'dusk')
+# # phase.save('phase.png')
+# phase.show()
 
 
 # make a phase plot comparing impact parameter to effective LOS velocity
-# phase = yt.PhasePlot(ad, ('index', "impact_parameter"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
-# phase.set_log('velocity_los', False)
-# phase.set_xlim(10, 250)
-# phase.set_ylim(-1500, 1500)
-# phase.set_cmap('column_density', 'dusk')
-# phase.save('phase.png')
-# phase.show()
+phase = yt.PhasePlot(ad, ('index', "impact_parameter"), ('gas', "velocity_los"), ["column_density"], weight_field=None)
+phase.set_log('velocity_los', False)
+phase.set_xlim(10, 250)
+phase.set_ylim(-1500, 1500)
+phase.set_cmap('column_density', 'dusk')
+phase.save('phase-2.png')
+phase.show()
 # import pickle
 # tup = (phase.profile['column_density'], phase.profile.x, phase.profile.y)
 # # Output the phase plot image arrays to a pickle file.
