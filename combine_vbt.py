@@ -7,7 +7,7 @@ from astropy.io import fits, ascii
 from astropy.table import Table
 # from pyds9 import *
 
-num = 600
+num = 190
 
 # d=DS9()
 
@@ -71,5 +71,5 @@ ax[2].axhline(0, c='k', ls='--', lw = 0.7)
 
 fig.supxlabel('$b$ (kpc)')
 fig.supylabel('$v_\mathrm{LOS}$ (km s$^{-1}$)')
-plt.savefig('MW_halo_vbt_highres_30.pdf', bbox_inches='tight')
+plt.savefig('h350_vbt_30.pdf', bbox_inches='tight')
 plt.show()

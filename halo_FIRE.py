@@ -19,7 +19,7 @@ from astropy.io import fits
 
 # using smoothing length as an analog for the size of the gas region
 def _H_I_number(field, data):
-    return data[('gas', 'H_number_density')] * (4./3. * 3.14 * data[('gas', 'smoothing_length')]**3)
+    return data[('gas', 'H_p0_number_density')] * (4./3. * 3.14 * data[('gas', 'smoothing_length')]**3)
 
 # This is to correct a problem in the tip of yt-4 that messes up the units
 # of cylindrical radius to be a factor of kpc/cm too low
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     with open(sys.argv[1]) as f:
         fns = [fn.rstrip() for fn in f.readlines()]
-    
+
     #amiga_data = get_amiga_data(sys.argv[2])
     #amiga_data = smooth_amiga(amiga_data)
     axes = [[1,0,0], [0,1,0], [0,0,1]]
@@ -113,13 +113,13 @@ if __name__ == '__main__':
             ad.set_field_parameter('bulk_velocity', bulk_vel)
             ad.set_field_parameter('normal', np.array(ax))
             #p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_number'), weight_field=('gas', 'ones'))
-            p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_number'), weight_field=None)
+            p = yt.PhasePlot(ad, ('PartType0', 'cylindrical_radius_kpc'), ('PartType0', 'velocity_cylindrical_z'), ('gas', 'H_I_number'))#, weight_field=None)
             p.set_unit(('PartType0', 'cylindrical_radius_kpc'), 'kpc')
             p.set_unit(('PartType0', 'velocity_cylindrical_z'), 'km/s')
             p.set_log(('PartType0', 'velocity_cylindrical_z'), False)
             p.set_xlim(1e1, 1e4)
             p.set_ylim(-1000,1000)
-            p.set_cmap(('gas', 'H_I_number'), 'thermal')
+            p.set_cmap(('gas', 'H_I_number'), cmocean.cm.thermal)
             #p.set_zlim(('gas', 'H_I_number'), 1e12, 1e25)
             p.set_xlabel('Impact Parameter (kpc)')
             p.set_ylabel('Line of Sight Velocity (km/s)')

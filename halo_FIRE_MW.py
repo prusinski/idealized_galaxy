@@ -20,7 +20,8 @@ from astropy.table import Table
 
 # using smoothing length as an analog for the size of the gas region
 def _H_I_number(field, data):
-    return data[('gas', 'H_p0_number_density')] * (4./3. * 3.14 * data[('gas', 'smoothing_length')]**1)
+    # return data[('gas', 'H_p0_number_density')] * data[('PartType0', 'dz')]
+    return data[('gas', 'H_p0_number_density')] * (2 * data[('gas', 'smoothing_length')])
 
 # This is to correct a problem in the tip of yt-4 that messes up the units
 # of cylindrical radius to be a factor of kpc/cm too low
