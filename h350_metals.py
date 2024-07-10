@@ -24,22 +24,22 @@ from itertools import repeat
 
 # using smoothing length as an analog for the size of the gas region
 def _H_I_number(field, data):
-    return data[('gas', 'H_p0_number_density')] * data[('gas', 'smoothing_length')]
+    return data[('gas', 'H_p0_number_density')] * 2*data[('gas', 'smoothing_length')]
 
 def _CII_col(field, data):
-    return data[('gas', 'C_p1_number_density')] * data[('gas', 'smoothing_length')]
+    return data[('gas', 'C_p1_number_density')] * 2*data[('gas', 'smoothing_length')]
 
 def _CIV_col(field, data):
-    return data[('gas', 'C_p3_number_density')] * data[('gas', 'smoothing_length')]
+    return data[('gas', 'C_p3_number_density')] * 2*data[('gas', 'smoothing_length')]
 
 def _O_col(field, data):
-    return data[('gas', 'O_p0_number_density')] * data[('gas', 'smoothing_length')]
+    return data[('gas', 'O_p0_number_density')] * 2*data[('gas', 'smoothing_length')]
 
 def _SiII_col(field, data):
-    return data[('gas', 'Si_p1_number_density')] * data[('gas', 'smoothing_length')]
+    return data[('gas', 'Si_p1_number_density')] * 2*data[('gas', 'smoothing_length')]
 
 def _SiIV_col(field, data):
-    return data[('gas', 'Si_p3_number_density')] * data[('gas', 'smoothing_length')]
+    return data[('gas', 'Si_p3_number_density')] * 2*data[('gas', 'smoothing_length')]
 
 # This is to correct a problem in the tip of yt-4 that messes up the units
 # of cylindrical radius to be a factor of kpc/cm too low
@@ -112,34 +112,34 @@ if __name__ == '__main__':
     # axes = [[1,0,0], [0,1,0], [0,0,1]]
     axes = 2*np.random.rand(30,3)-1
 
-    # for fn in yt.parallel_objects(fns):
-    fn = fns[0]
-    fn_head = fn.split('/')[-1]
-    n = int(fn_head.split('.')[0][-3:])
+    for fn in yt.parallel_objects(fns):
+        fn = fn.strip()
+        fn_head = fn.split('/')[-1]
+        n = int(fn_head.split('.')[0][-3:])
 
-    ds = GizmoDataset(fn)
-    trident.add_ion_fields(ds, ions=['C IV', 'Si II', 'O I', 'C II', 'Si IV'])
+        ds = GizmoDataset(fn)
+        trident.add_ion_fields(ds, ions=['C IV', 'Si II', 'O I', 'C II', 'Si IV'])
 
-    ds.add_field(("gas","C_II_column_density"), function=_CII_col, units="cm**(-2)", sampling_type='particle')
-    ds.add_field(("gas","C_IV_column_density"), function=_CIV_col, units="cm**(-2)", sampling_type='particle')
-    ds.add_field(("gas","O_I_column_density"), function=_O_col, units="cm**(-2)", sampling_type='particle')
-    ds.add_field(("gas","Si_II_column_density"), function=_SiII_col, units="cm**(-2)", sampling_type='particle')
-    ds.add_field(("gas","Si_IV_column_density"), function=_SiIV_col, units="cm**(-2)", sampling_type='particle')
+        ds.add_field(("gas","C_II_column_density"), function=_CII_col, units="cm**(-2)", sampling_type='particle')
+        ds.add_field(("gas","C_IV_column_density"), function=_CIV_col, units="cm**(-2)", sampling_type='particle')
+        ds.add_field(("gas","O_I_column_density"), function=_O_col, units="cm**(-2)", sampling_type='particle')
+        ds.add_field(("gas","Si_II_column_density"), function=_SiII_col, units="cm**(-2)", sampling_type='particle')
+        ds.add_field(("gas","Si_IV_column_density"), function=_SiIV_col, units="cm**(-2)", sampling_type='particle')
 
-    #ds = yt.load(fn)
-    c = find_center_iteratively(fn, ds=ds)
-    #c = read_amiga_center(amiga_data, fn, ds)
-    #_, c = ds.find_max('density')
-    rvir = ds.quan(30, 'kpc')
-    sp = ds.sphere(c, rvir)
-    bulk_vel = sp.quantities.bulk_velocity()
-    #print("Bulk Velocity of Halo = %s" % bulk_vel.to('km/s'))
-    sp.set_field_parameter("bulk_velocity", bulk_vel)
+        #ds = yt.load(fn)
+        c = find_center_iteratively(fn, ds=ds)
+        #c = read_amiga_center(amiga_data, fn, ds)
+        #_, c = ds.find_max('density')
+        rvir = ds.quan(30, 'kpc')
+        sp = ds.sphere(c, rvir)
+        bulk_vel = sp.quantities.bulk_velocity()
+        #print("Bulk Velocity of Halo = %s" % bulk_vel.to('km/s'))
+        sp.set_field_parameter("bulk_velocity", bulk_vel)
 
 
-    # print(product(enumerate(axes),))
-    # print(zip(list(range(len(axes))), axes, repeat(n), repeat(ds)))
-    for i, a in enumerate(axes):
-        hmap(i,a, n, ds)
+        # print(product(enumerate(axes),))
+        # print(zip(list(range(len(axes))), axes, repeat(n), repeat(ds)))
+        for i, a in enumerate(axes):
+            hmap(i,a, n, ds)
     # pool = Pool()
     # pool.starmap(hmap, zip(list(range(len(axes))), axes, repeat(n), repeat(ds)))
